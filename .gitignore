@@ -1,0 +1,25 @@
+################Control-web specific files########################
+
+src/shipxpress/control3/Control3.gwt.xml
+war/META-INF/context.xml
+dist/
+.idea/
+gwt-unitCache/
+war/WEB-INF/classes
+war/App
+war/pages/jasper/out
+dist
+*.iml
+war/WEB-INF/deploy/App/symbolMaps
+logs/
+.java-version
+/build/
+/test/report/
+/test/jacoco.exec
+/test/build/
+/nbproject/private/
+/nbproject/
+/nbbuild.xml
+/war/WEB-INF/glassfish-web.xml
+*.DS_Store
+/tools/output/*
