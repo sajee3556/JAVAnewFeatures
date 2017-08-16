@@ -34,6 +34,10 @@ public class JavaFeaturesDemo {
 
         list.forEach(n->System.out.println(n) );
 
+        //outer class interface
+        ShowMe showMine=s->javaFeaturesDemo.Print(s);
+        showMine.showMe("Surya Saravanan");
+
     }
 
     interface MathOperation{
@@ -42,6 +46,10 @@ public class JavaFeaturesDemo {
 
     interface GreetingService {
         void sayMessage(String message);
+    }
+
+    private void Print(String me){
+        System.out.println("you are "+me);
     }
 
     private double operate(int a, int b,MathOperation mathOperation){
