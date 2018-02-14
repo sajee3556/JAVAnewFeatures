@@ -1,3 +1,5 @@
+package staticReference;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class JavaFeaturesDemo {
         list.forEach(n->System.out.println(n) );
 
         //outer class interface
-        ShowMe showMine=s->javaFeaturesDemo.Print(s);
+        ShowMe showMine= s->javaFeaturesDemo.Print(s);
         showMine.showMe("Surya Saravanan");
 
     }
