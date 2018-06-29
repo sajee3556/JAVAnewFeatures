@@ -1,0 +1,61 @@
+Oracle sql queries.... compare with list multi columns*****************************************************
+
+ (:contractNumber is null or ((r.EQUIPMENT_INITIAL, r.EQUIPMENT_NUMBER )IN    //MULTI COLUMNS
+
+ (Select eq.EQUIPMENT_INITIAL, eq.EQUIPMENT_NUMBER from EQUIPMENTS eq          //JOIN THree TAbLes
+         INNER JOIN EQUIPMENT_CONTRACT ec
+         ON ec.EQUIPMENT_ID = eq.EQUIPMENT_ID
+         INNER JOIN CONTRACT c
+         ON c.CONTRACT_ID = ec.CONTRACT_ID and c.CONTRACT_ID = :contractNumber)))
+
+         --SET Value in dao level----
+    query.setParameterList("roadMarkTypeList", model.getRoadMarkTypeArr())
+                        .setString("roadMarkTypeListFlag", "yes");
+
+                        ----HBM---
+    (m.ROADMARK_TYPE in (:roadMarkTypeList) OR :roadMarkTypeListFlag is   null)
+
+ **********************************************************************************************************************
+
+ Check case conditions----------------------------------- Consider NUll condition if use join then null is a problem
+
+        case
+        when exists (select 1 from LOOKUP_LISTS lc where
+        lpad( r.ACCOUNT_TYPE_CD , 3, '0') = lc.LIST_CODE
+        and lc.LIST_NAME='RECEIVABLE_ACCOUNT_TYPE')
+
+        then (select lc.LIST_CODE_DESCRIPTION from LOOKUP_LISTS lc
+        where lpad( r.ACCOUNT_TYPE_CD , 3, '0') =lc.LIST_CODE           // lpad used for reformat Number in fixed length
+        and lc.LIST_NAME='RECEIVABLE_ACCOUNT_TYPE')
+        else ''
+
+        END as accountType
+
+ --------------------------------------------------------------------------------------------------------------------------
+
+  DECODE      >>>>>>>>>>>>>>>>>>>>>>>>
+
+    DECODE(aa.STATUS, 'C', CURRENT_PROCESSING_MONTH,
+        'RO', NEW_PROCESSING_MONTH
+        ) CURRENT_PROCESSING_MONTH,
+
+    DECODE(aa.STATUS, 'C', NEW_PROCESSING_MONTH,
+        'RO', CURRENT_PROCESSING_MONTH
+        ) NEW_PROCESSING_MONTH,
+
+    DECODE(aa.STATUS, 'C', 'Close',
+            'RO', 'Reopen'
+            ) STATUS,
+
+   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.
+
+    Using EXIST and NOT EXIST
+
+    -----------------------------
+    to_number(to_char(csa.STOP_DATE, 'yyyymm')) //convert date to number
+    to_char(to_date(r.EARNED_MONTH,'yyyymm'),'mm/yyyy') as earnedMonthFormatted //covert number to short date
+
+    SELECT * FROM ( select * from CLIENT)  cl where cl.CLIENT_ID = '13'; //special filter from filtered results
+
+     >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    create view

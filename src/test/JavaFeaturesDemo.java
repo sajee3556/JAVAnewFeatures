@@ -85,6 +85,8 @@ public class JavaFeaturesDemo {
         System.out.println("result2 string: "+"C".contentEquals(String.valueOf('C')));
         System.out.println();
 
+        System.out.println("411..1".matches("^\\d+(\\.\\d{1,2})?"));
+
     }
 
 }

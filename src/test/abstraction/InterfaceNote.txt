@@ -1,0 +1,26 @@
+Abstraction is a process of hiding the implementation details and showing only functionality to the user.
+
+Interface: It is used to achieve abstraction and multiple inheritance in Java.
+           Java Interface also represents IS-A relationship.
+           -> static can have method body
+           -> Since Java 8, we can have method body in interface. But we need to make it default method.
+
+           /*
+           * The java compiler adds public and abstract keywords before the interface method.
+           * More, it adds public, static and final keywords before data members.
+           */
+ NOTE: If a class implements multiple interfaces, or an interface extends multiple interfaces
+        i.e. known as multiple inheritance.
+
+        multiple inheritance is not supported in case of class because of ambiguity. //ambiguity- <Thelivinmai>
+        But it is supported in case of interface because there is no ambiguity as implementation is provided
+        by the implementation class.
+
+        *******************************************************
+        An interface that have no member is known as marker or tagged interface.
+        For example: Serializable, Cloneable, Remote etc. They are used to provide some essential information
+         to the JVM so that JVM may perform some useful operation.
+        ***************************************************************************************
+
+Abstract Class: A class that is declared as abstract is known as abstract class.
+                It needs to be extended and its method implemented. It cannot be instantiated.

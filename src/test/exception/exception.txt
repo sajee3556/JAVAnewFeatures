@@ -1,0 +1,48 @@
+* Checked Exception
+   The classes that extend Throwable class except RuntimeException and Error are known as checked exceptions
+   e.g.SQLException
+       IOException
+       ClassNotFoundException
+       InvocationTargetException etc. Checked exceptions are checked at compile-time.
+
+* Unchecked Exception
+  The classes that extend RuntimeException are known as unchecked exceptions
+  e.g. NullPointerException
+       ArrayIndexOutOfBoundsException
+       ArithmeticException
+       IllegalArgumentException
+       NumberFormatException etc.
+  Unchecked exceptions are not checked at compile-time rather they are checked at runtime.
+
+*  Error
+    Error is irrecoverable e.g. OutOfMemoryError, VirtualMachineError, AssertionError etc.
+
+--> The JVM firstly checks whether the exception is handled or not. If exception is not handled, JVM provides a default exception
+
+************************
+The Java throw keyword is used to explicitly throw an exception.
+
+We can throw either checked or uncheked exception in java by throw keyword.
+The throw keyword is mainly used to throw custom exception. We will see custom exceptions later.
+
+
+**************************************
+
+Java Exception propagation :
+An exception is first thrown from the top of the stack and if it is not caught,
+    it drops down the call stack to the previous method,If not caught there,
+        the exception again drops down to the previous method,
+         and so on until they are caught or until they reach the very bottom of the call stack.
+         This is called exception propagation.
+
+when used throws : keyword we can handle it later
+
+*************************************************************************
+
+The Java throws keyword is used to declare an exception.
+It gives an information to the programmer that there may occur an exception so it is better for the programmer
+to provide the exception handling code so that normal flow can be maintained.
+
+Now Checked Exception can be propagated (forwarded in call stack).
+
+It provides information to the caller of the method about the exception.
