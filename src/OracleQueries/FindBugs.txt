@@ -1,0 +1,157 @@
+1. Use String Buffer or Builder for string concatination: 
+	->> Strings are immutable in JAVA which means every time we are using '+' operator to concatenate a number to 	
+	result, a new String Object is created. 'i' is 	first converted to String by JAVA automatically. Then a new memory
+ 	allocation is done to store the concatenation of 'result' and 'i' (discarding the previous space for result).
+ 	Hence, creating a lot of temporary garbage in the heap memory. The memory allocation for each iteration makes the program very slow 
+	and could eventually eat up all your heap memory for larger n. To prevent this situation, JAVA has two classes StringBuffer and StringBuilder.
+
+	->> The difference between StringBuffer and StringBuilder is that StringBuffer is thread safe whereas StringBuilder is not thread safe. Therefore, 		StringBuilder is faster. StringBuffer should be used only when we have a shared buffer space between threads otherwise StringBuilder should be used.
+
+2. Reliance on default encoding Found a call to a method which will perform a byte to String (or String to byte) conversion, and will assume that the default 
+	platform encoding is suitable. This will cause the application behaviour to vary between platforms. Use an alternative API and specify a 
+	charset name or Charset object explicitly.
+
+		->>You don't need a library beyond the standard one - just use Charset. (You can just use the String constructors and getBytes methods,
+		 but personally I don't like just working with the names of character encodings. EDIT: As pointed out in comments, you can still use Charset
+		 instances but have the ease of use of the String methods: new String(bytes, charset) and String.getBytes(charset).
+
+3."May expose internal representation by returning" your array MALICIOUS_CODE EI_EXPOSE_REP : 
+	->> Arrays are not the only thing that has mutable state. By following your rationale we should somehow make a safe copy or clone for all mutable objects
+	->> If instances accessed by untrusted code, and unchecked changes to the mutable object would compromise security or other properties. Returning a new copy 
+		of the object is better approach.  
+
+***************  Mutable objects have fields that can be changed, immutable objects have no fields that can be changed after the object is created.******
+	Immutable means that once the constructor for an object has completed execution that instance can't be altered.
+
+4. You must override hashCode() in every class that overrides equals(): 
+		If only equals is overriden, then when you call myMap.put(first,someValue) first will hash to some bucket and when you call myMap.put		(second,someOtherValue) it will hash to some other bucket (as they have a different hashCode). So, although they are equal,
+		 as they don't hash to the same bucket, the map can't realize it and both of them stay in the map.
+
+
+	********************************************************************** Java.lang.Object has methods called hasCode() and equals().
+						 These methods play a significant role in the real time application*******************************************
+
+	1. hashCode() provided by Object is derived by mapping the memory address to an integer value. hashCode is the native implementation which provides
+		 the memory address to a certain extent.
+	2. equals(): two objects are equivalent they satisfy the “equals()” condition. 
+
+	In this regard there is a rule of thumb that if you are going to override the one of the methods( ie equals() and hashCode() ) , 
+	you have to override the both otherwise it is a violation of contract made for equals() and hashCode().
+
+5. Cannot refer to the non-final local variable content defined in an enclosing scope : your local variable will be cleaned up from the stack, so they won't exist 	anymore. But the anonymous class object new View.OnClickListener() references these variables. Of cause it's wrong behavior so java don't allow you to do this.
+
+	After it is final it becomes a constant. So it is storing in the heap and can be safely used in anonymous classes.
+
+
+6. This noncompliant code example attempts to delete a file but fails to check whether the operation has succeeded: file.delete();
+	This compliant solution checks the Boolean value returned by the delete() method and handles any resulting errors:
+
+7. static field from instance method: This instance method writes to a static field. This is tricky to get correct if multiple instances are being manipulated,
+					 and generally bad practice.
+	public static setTestInt ( int a ) {  TestClass.testInt = a ; } create setter static method and set to that value...
+
+8. Java Comparable interface is used to order the objects of user-defined class.This interface is found in java.lang package and contains only one method 
+	named compareTo(Object). It provide single sorting sequence only i.e. you can sort the elements on based on single data member only.
+	 For example it may be rollno, name, age or anything else.
+
+9. System.exit() : We exclude this bug using suppression.xml -> excludefilter="${findbugs.suppressions.file}"
+	<?xml version="1.0" encoding="UTF-8"?>
+	<FindBugsFilter>
+	    <Match>
+       		 <Bug pattern="DM_EXIT"/>
+        	 <Or>
+                 <Class name="shipxpress.control3.server.chdxManagement.service.impl.CHDXServiceImpl"/>
+           	 <Class name="shipxpress.control3.server.umlerManagement.service.impl.UmlerServiceImpl"/>
+        	</Or>
+    	    </Match>
+	</FindBugsFilter>
+	
+10. System.gc() -> ... forces garbage collection; extremely dubious except in benchmarking code
+	Code explicitly invokes garbage collection. Except for specific use in benchmarking, this is very dubious.people have explicitly invoked the garbage 
+	collector in routines such as close or finalize methods has led to huge performance black holes. Garbage collection can be expensive. Any situation 
+	that forces hundreds or thousands of garbage collections will bring the machine to a crawl.
+	
+	**Usually modern garbage collectors know best when to run, so you shouldnt force a collection, unless you have a really really good reason to.**
+
+11. java.util.concurrent.Future	:exceptional return value
+	Future class represents a future result of an asynchronous computation – a result that will eventually 
+		appear in the Future after the processing is complete.	
+		ex: future.isDone() return boolean value.
+
+12. non-transient non-serializable instance field in serializable class : However it is best practice to code against interfaces instead of concrete implementations.
+     * Serialization in java is a mechanism of writing the state of an object into a byte stream.It is mainly used in Hibernate, RMI, JPA,EJB and JMS technologies.
+     * Student class implements Serializable interface. Now its objects can be converted into stream.
+     * Java transient keyword is used in serialization. If you define any data member as transient, it will not be serialized.
+     
+	This Serializable class defines a non-primitive instance field which is neither transient, Serializable, or java.lang.Object, and 
+	does not appear to implement the Externalizable interface or the readObject() and writeObject() methods. 
+	Objects of this class will not be deserialized correctly if a non-Serializable object is stored in this field.
+
+	************ Marking variables as transient is the safest and easiest modification.***********************************
+	
+
+	private void writeObject(final ObjectOutputStream out) throws IOException
+  	 {
+      		out.writeUTF(this.cityState.getCityName());
+   	 }
+
+	private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException
+   	{
+    	  this.cityState = new CityState(in.readUTF());
+  	}
+
+
+14. HTTP Response splitting vulnerability : 
+	HTTP response splitting is a form of web application vulnerability, resulting from the failure of the application or its environment to properly 
+	sanitize input values. It can be used to perform cross-site scripting attacks, cross-user defacement, web cache poisoning, and similar exploits.
+
+	The generic solution is to URL-encode strings before inclusion into HTTP headers such as Location or Set-Cookie.
+	 If you are concerned about HTTP response splitting, you should seriously consider using a commercial static analysis or pen-testing tool.
+
+	public static String encode(String url)
+    	{
+       	 	try {
+            String encodeURL= URLEncoder.encode( url, "UTF-8" );
+            return encodeURL;
+      		  } catch (UnsupportedEncodingException e) {
+            return "Issue while encoding" +e.getMessage();
+       		}
+    	}
+**************************************************************************************************************************************************************
+	carriage return and a line feed(CRLF) : Cross-Site Scripting vulnerability.
+	
+	Cross-Site Scripting vulnerability - Same Origin Policy (SOP),is one of the most important security principles in every web browser.
+	Cross-Site Scripting, also known as XSS, is a way of bypassing the SOP concept. Whenever HTML code is generated dynamically, and the user input is not 		sanitized and is reflected on the page, an attacker could insert his own HTML code. The web browser will still show the user's code 
+		since it pertains to the website where it is injected.
+	 
+		In such cases, an attacker can easily insert JavaScript code which would run under the site's context. By doing so, the attacker is able to access 		other pages on the same domain and can read data like CSRF-Tokens or the set cookies.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
