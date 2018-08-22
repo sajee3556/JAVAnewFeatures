@@ -15,11 +15,14 @@ public class AsynchronousDemo {
         * instead compiler create a new String object with "Bye" value and s1 referenced to it.s1 variable, refers to string in memory
         */
         String s1="Hi";
+        System.out.println(s1+" object: "+s1.hashCode());
         String s2=s1;
         s1="Bye";
 
         System.out.println(s2); //Hi  (if String was mutable output would be: Bye)
+        System.out.println(s2+" object: "+s2.hashCode());
         System.out.println(s1);
+        System.out.println(s1+" object: "+s1.hashCode());
         System.out.println();
 
         AsynchronousPro sumX= new AsynchronousPro(10,"sumX");
