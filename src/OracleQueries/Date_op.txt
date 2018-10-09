@@ -1,0 +1,144 @@
+Select MIN(START_DATE) from CLIENT_SERVICES_ALLO where CLIENT_ID =:clientId;
+Select NextDate(MAX(EXPIRATION_DATE))from RECEIVABLE_PARAMETER where CLIENT_ID =:clientId;
+
+SELECT  
+  CASE WHEN EXISTS(SELECT * FROM RECEIVABLE_PARAMETER where CLIENT_ID =:clientId) 
+         THEN  (Select NextDate(MAX(EXPIRATION_DATE))from RECEIVABLE_PARAMETER where CLIENT_ID =:clientId)
+         ELSE  (Select MIN(START_DATE) from CLIENT_SERVICES_ALLO where CLIENT_ID =:clientId)
+  END as Eff_Date
+FROM DUAL;
+
+SELECT  
+  CASE WHEN EXISTS(SELECT * FROM RECEIVABLE_PARAMETER where CLIENT_ID =:clientId) 
+         THEN  (CASE WHEN ((SELECT NextDate(MAX(EXPIRATION_DATE))from RECEIVABLE_PARAMETER where CLIENT_ID =:clientId) 
+         <= (SELECT csa.STOP_DATE from CLIENT_SERVICES_ALLO csa where csa.CLIENT_ID =:clientId AND (SELECT MAX(rp.EXPIRATION_DATE) from RECEIVABLE_PARAMETER rp where CLIENT_ID =:clientId) 
+                            between csa.START_DATE AND csa.STOP_DATE)) 
+                        THEN (Select NextDate(MAX(EXPIRATION_DATE))from RECEIVABLE_PARAMETER where CLIENT_ID =:clientId)
+                        ELSE (SELECT MIN(csa.START_DATE) from CLIENT_SERVICES_ALLO csa where csa.CLIENT_ID =:clientId 
+                        AND csa.START_DATE >= (SELECT NextDate(MAX(rp.EXPIRATION_DATE))from RECEIVABLE_PARAMETER rp where CLIENT_ID =:clientId))
+                        END )
+         ELSE  (Select MIN(START_DATE) from CLIENT_SERVICES_ALLO where CLIENT_ID =:clientId)
+  END as Eff_Date
+FROM DUAL;
+***************************************************************************************************************************************************************
+SELECT csa.STOP_DATE 
+from CLIENT_SERVICES_ALLO csa
+where csa.CLIENT_ID =:clientId 
+AND (SELECT NextDate(MAX(rp.EXPIRATION_DATE))from RECEIVABLE_PARAMETER rp where CLIENT_ID =:clientId) between csa.START_DATE AND csa.STOP_DATE;
+
+SELECT  
+  CASE WHEN EXISTS(SELECT * FROM RECEIVABLE_PARAMETER where CLIENT_ID =:clientId) 
+         THEN  (CASE WHEN ((SELECT NextDate(MAX(EXPIRATION_DATE))from RECEIVABLE_PARAMETER where CLIENT_ID =:clientId) 
+         < (SELECT csa.STOP_DATE from CLIENT_SERVICES_ALLO csa where csa.CLIENT_ID =:clientId AND (SELECT MAX(rp.EXPIRATION_DATE) from RECEIVABLE_PARAMETER rp where CLIENT_ID =:clientId) between csa.START_DATE AND csa.STOP_DATE)) 
+                        THEN (Select NextDate(MAX(EXPIRATION_DATE))from RECEIVABLE_PARAMETER where CLIENT_ID =:clientId)
+                        ELSE (Select NextDate(MAX(EXPIRATION_DATE))from RECEIVABLE_PARAMETER where CLIENT_ID =:clientId)
+                        END )
+         ELSE  (Select MIN(START_DATE) from CLIENT_SERVICES_ALLO where CLIENT_ID =:clientId)
+  END as Eff_Date
+FROM DUAL;
+
+SELECT csa.START_DATE, csa.STOP_DATE from CLIENT_SERVICES_ALLO csa where csa.CLIENT_ID =:clientId AND (SELECT NextDate(MAX(rp.EXPIRATION_DATE))from RECEIVABLE_PARAMETER rp where CLIENT_ID =:clientId) between csa.START_DATE AND csa.STOP_DATE;
+
+SELECT MIN(csa.START_DATE) 
+from CLIENT_SERVICES_ALLO csa 
+where csa.CLIENT_ID =:clientId
+AND csa.START_DATE >= (SELECT NextDate(MAX(rp.EXPIRATION_DATE))from RECEIVABLE_PARAMETER rp where CLIENT_ID =:clientId); 
+***********************************************************************************************************************************
+
+//GAP
+SELECT STOP_DATE
+FROM
+     (SELECT csa.*,
+     LEAD(csa.START_DATE,1) OVER (ORDER BY csa.START_DATE) AS next_date
+     FROM CLIENT_SERVICES_ALLO csa
+     WHERE csa.CLIENT_ID =:clientId AND
+        csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N'
+     )
+WHERE STOP_DATE+1<>next_date;
+**********************************************************************************************************************************
+SELECT MIN(STOP_DATE)
+FROM
+     (SELECT csa.*,
+     LEAD(csa.START_DATE,1) OVER (ORDER BY csa.START_DATE) AS next_date
+     FROM CLIENT_SERVICES_ALLO csa
+     WHERE csa.CLIENT_ID =:clientId AND
+        csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+        csa.STOP_DATE >= :effctiveDate 
+     )
+WHERE STOP_DATE+1<>next_date;
+
+SELECT 
+    CASE WHEN EXISTS(SELECT STOP_DATE
+                 FROM
+                 (SELECT csa.*,
+                 LEAD(csa.START_DATE,1) OVER (ORDER BY csa.START_DATE) AS next_date
+                 FROM CLIENT_SERVICES_ALLO csa
+                 WHERE csa.CLIENT_ID =:clientId AND
+                    csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                    csa.STOP_DATE >= :effectiveDate 
+                 )
+            WHERE STOP_DATE+1<>next_date)
+      THEN (SELECT MIN(STOP_DATE)
+            FROM
+                 (SELECT csa.*,
+                 LEAD(csa.START_DATE,1) OVER (ORDER BY csa.START_DATE) AS next_date
+                 FROM CLIENT_SERVICES_ALLO csa
+                 WHERE csa.CLIENT_ID =:clientId AND
+                    csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                    csa.STOP_DATE >= :effectiveDate 
+                 )
+            WHERE STOP_DATE+1<>next_date)      
+       ELSE (SELECT MAX(csa.STOP_DATE)
+             FROM CLIENT_SERVICES_ALLO csa
+             WHERE csa.CLIENT_ID =:clientId AND
+                   csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                   csa.STOP_DATE >= :effectiveDate )  
+       END as  STOP_DATE
+ FROM DUAL
+ ***********************************************************************************************************************************************************
+ 
+ <sql-query name="getPossibleApplicationStartDateByClientId">
+        <![CDATA[
+               SELECT
+                CASE WHEN EXISTS(SELECT START_DATE
+                             FROM
+                             (SELECT csa.*,
+                             LEAD(csa.START_DATE,1) OVER (ORDER BY csa.START_DATE) AS next_date
+                             FROM CLIENT_SERVICES_ALLO csa
+                             WHERE csa.CLIENT_ID =:clientId AND
+                                csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                                csa.START_DATE <= :effectiveDate
+                             )
+                        WHERE STOP_DATE+1<>next_date)
+                  THEN (CASE WHEN EXISTS(SELECT csa.* FROM CLIENT_SERVICES_ALLO csa where csa.CLIENT_ID =:clientId AND
+                               csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                                            :effectiveDate BETWEEN csa.START_DATE AND csa.STOP_DATE)
+                    THEN(SELECT MIN(cs.START_DATE) FROM CLIENT_SERVICES_ALLO cs
+                        WHERE cs.CLIENT_ID =:clientId AND
+                        cs.CLIENT_SERVICE_ID = :serviceId AND cs.IS_DELETED = 'N' AND
+                        cs.START_DATE > (SELECT MAX(STOP_DATE)
+                             FROM
+                             (SELECT csa.*,
+                             LEAD(csa.START_DATE,1) OVER (ORDER BY csa.START_DATE) AS next_date
+                             FROM CLIENT_SERVICES_ALLO csa
+                             WHERE csa.CLIENT_ID =:clientId AND
+                                csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                                csa.START_DATE <= :effectiveDate
+                             )
+                        WHERE STOP_DATE+1<>next_date))
+                        END )
+                   ELSE (CASE WHEN EXISTS(SELECT csa.* FROM CLIENT_SERVICES_ALLO csa where csa.CLIENT_ID =:clientId AND
+                               csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                                            :effectiveDate BETWEEN csa.START_DATE AND csa.STOP_DATE)
+                   THEN (SELECT MIN(csa.START_DATE)
+                         FROM CLIENT_SERVICES_ALLO csa
+                         WHERE csa.CLIENT_ID =:clientId AND
+                               csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                               csa.START_DATE <= :effectiveDate )
+                   END )
+                   END as  START_DATE
+              FROM DUAL
+        ]]>
+    </sql-query>
+	
+	*****************************************************************************************************************************************************

@@ -30,6 +30,10 @@ public class NewTest {
 
         System.out.println("Rounded value: " +getRoundedValue(2.100,2));
 
+        String trh = "9999-12-24 00:00:00.0";
+        String[] ret=  trh.split(" ");
+        System.out.println(trh.subSequence(0,10));
+
     }
 
     static double roundTwoDecimalPlaces(double value) {

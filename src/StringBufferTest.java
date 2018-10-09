@@ -1,3 +1,5 @@
+import com.sun.deploy.util.StringUtils;
+
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,18 +34,18 @@ public class StringBufferTest {
 //
 //        System.out.println("Buffer: "+buf.toString());
 
-//        System.out.println();
-//        String cetury = "20";
-//        String year = "18";
-//        String month1 = "02";
-//        String month2 = "03";
-//        Integer begin = 87;
-//        Integer end = 487;
-//        Date start = getDateAndTime(cetury,year,month1,end);
-//        System.out.println("Start: "+start);
-//        Date enddate = getDateAndTime(cetury,year,month2,begin);
-//        System.out.println("end: "+enddate);
-//        System.out.println("Difference: "+(enddate.getTime()-start.getTime())/(60*60 * 1000));
+        System.out.println();
+        String cetury = "20";
+        String year = "18";
+        String month1 = "04";
+        String month2 = "04";
+        Integer begin = 526;
+        Integer end = 714;
+        Date start = getDateAndTime(cetury,year,month1,begin);
+        System.out.println("Start: "+start);
+        Date enddate = getDateAndTime(cetury,year,month2,end);
+        System.out.println("end: "+enddate);
+        System.out.println("Difference: "+(enddate.getTime()-start.getTime())/(60*60 * 1000));
 //
 //        System.out.println();
 //        String dateStr = "20170808" ;
@@ -70,32 +72,52 @@ public class StringBufferTest {
 //           // sampleMethod.invoke(object, new Integer(value.trim()));
 //        }
 
-        Double mileAmount = -0.01;
-        Double vbn = 0.0;
-        System.out.println( Math.abs(mileAmount) > 0);
+//        Double mileAmount = -0.01;
+//        Double vbn = 0.0;
+//        System.out.println( Math.abs(mileAmount) > 0);
+//
+//        Double rate = .0011;
+//        Double rate1 = 0.0113;
+//
+//        System.out.println(Double.valueOf(rate).intValue());
+//        String[] spilt = Double.valueOf(rate).toString().split("E-");
+//        System.out.println(Double.valueOf(rate).doubleValue());
+//
+//        System.out.println(isNumberWithCorrectDecimal
+//                (rate, 10, 4));
+//        System.out.println(isNumberWithCorrectDecimal
+//                (rate1, 10, 4));
+//        System.out.println();
+//
+//        String equipmentInt1 = "TYZX";
+//        String equipmentInt2 = "TTER";
+//        System.out.println(isPrivateCar(equipmentInt1));
+//        System.out.println(isPrivateCar(equipmentInt2));
 
-        Double rate = .0011;
-        Double rate1 = 0.0113;
+        System.out.println(MonthGwt.of(12));
+        String date = "201801";
+        String date1 = date.substring(0,4);
+        String date2 = date.substring(4,6);
+        System.out.println("dd: "+date1+" "+date2+MonthGwt.of(Integer.parseInt(date2)));
 
-        System.out.println(Double.valueOf(rate).intValue());
-        String[] spilt = Double.valueOf(rate).toString().split("E-");
-        System.out.println(Double.valueOf(rate).doubleValue());
 
-        System.out.println(isNumberWithCorrectDecimal
-                (rate, 10, 4));
-        System.out.println(isNumberWithCorrectDecimal
-                (rate1, 10, 4));
+        System.out.println("IS Numeric: "+checkNumeric(12));
         System.out.println();
 
-        String equipmentInt1 = "TYZX";
-        String equipmentInt2 = "TTER";
-        System.out.println(isPrivateCar(equipmentInt1));
-        System.out.println(isPrivateCar(equipmentInt2));
+        arr("Sajee");
+        arr();
+        arr("mad","sad");
     }
 
     private static boolean isPrivateCar(String equipmentInt ) {
         return ((equipmentInt.length() == 4) &&
                 ("X".equalsIgnoreCase(String.valueOf(equipmentInt.charAt(3)))));
+    }
+
+    public static void arr(String... type){
+        if(type.length > 0) System.out.println("Der: "+type[0]);
+        System.out.println("Bool: "+(type == null)+" "+(null == type)+" "+!(type.length > 0));
+        System.out.println();
     }
 
     private static java.util.Date normalizeDate(java.util.Date date) {
@@ -120,17 +142,26 @@ public class StringBufferTest {
         modifiedHours = hour % 24;
 
         String lastDayOfTheMonth = lastDateOfTheMonthStr(stringToDateWithFormat((month + "/" + century + year), "MM/yyyy"));
-        if (modifiedDay > Integer.parseInt(lastDayOfTheMonth)) { //if modified day is greater than last day of the month
-            modifiedDay -= 1;
-            modifiedHours = 23;
-            modifiedMinutes = 59;
-        }
+//        if (modifiedDay > Integer.parseInt(lastDayOfTheMonth)) { //if modified day is greater than last day of the month
+//            modifiedDay -= 1;
+//            modifiedHours = 23;
+//            modifiedMinutes = 59;
+//        }
 
         String dateAndTime = century + year + "-" + month + "-" + modifiedDay + " " + modifiedHours + ":" + modifiedMinutes;
         try {
             return dateAndTimeFormat.parse(dateAndTime);
         } catch (ParseException e) {
             return null;
+        }
+    }
+
+    public static boolean checkNumeric(Object object) {
+        try{
+            Integer number = Integer.parseInt(String.valueOf(object));
+            return (number >= 0 ? true: false);
+        }catch (NumberFormatException ex){
+            return false;
         }
     }
 
@@ -178,4 +209,5 @@ public class StringBufferTest {
         return String.valueOf(val).matches("^\\d{1," + maxDigitsPriorToDecimal + "}+\\.\\d{1," + maxDigitAfterDecimal + "}$");
 
     }
+
 }
