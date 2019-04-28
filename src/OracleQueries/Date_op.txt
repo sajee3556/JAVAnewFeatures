@@ -1,3 +1,12 @@
+//Last day of the month
+select TO_CHAR(ADD_MONTHS(TO_DATE('201502','YYYYMM'),1)-1,'MM/DD/YYYY') from dual;
+SELECT LAST_DAY(TO_DATE('201502','YYYYMM')) FROM DUAL ;
+//first day of the month
+select trunc(TO_DATE('201502','YYYYMM'), 'mm') from dual;
+
+//MM/YYYY -> YYYYMM
+RETURN CONCAT(SUBSTR(formatNumber, 4,4),SUBSTR(formatNumber, 1,2))
+*************************************************************************************************
 Select MIN(START_DATE) from CLIENT_SERVICES_ALLO where CLIENT_ID =:clientId;
 Select NextDate(MAX(EXPIRATION_DATE))from RECEIVABLE_PARAMETER where CLIENT_ID =:clientId;
 
@@ -142,3 +151,81 @@ SELECT
     </sql-query>
 	
 	*****************************************************************************************************************************************************
+ <sql-query name="getPossibleExpirationDateByClientId">
+        <![CDATA[
+            SELECT
+                CASE WHEN EXISTS(SELECT STOP_DATE
+                             FROM
+                             (SELECT csa.*,
+                             LEAD(csa.START_DATE,1) OVER (ORDER BY csa.START_DATE) AS next_date
+                             FROM CLIENT_SERVICES_ALLO csa
+                             WHERE csa.CLIENT_ID =:clientId AND
+                                csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                                csa.STOP_DATE >= :effectiveDate
+                             )
+                        WHERE STOP_DATE+1<>next_date)
+                  THEN (SELECT MIN(STOP_DATE)
+                        FROM
+                             (SELECT csa.*,
+                             LEAD(csa.START_DATE,1) OVER (ORDER BY csa.START_DATE) AS next_date
+                             FROM CLIENT_SERVICES_ALLO csa
+                             WHERE csa.CLIENT_ID =:clientId AND
+                                csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                                csa.STOP_DATE >= :effectiveDate
+                             )
+                        WHERE STOP_DATE+1<>next_date)
+                   ELSE (SELECT MAX(csa.STOP_DATE)
+                         FROM CLIENT_SERVICES_ALLO csa
+                         WHERE csa.CLIENT_ID =:clientId AND
+                               csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                               csa.STOP_DATE >= :effectiveDate )
+                   END as  STOP_DATE
+             FROM DUAL
+         ]]>
+    </sql-query>
+    ********************************************************************************
+    <sql-query name="getPossibleApplicationStartDateByClientId">
+        <![CDATA[
+               SELECT
+                CASE WHEN EXISTS(SELECT START_DATE
+                             FROM
+                             (SELECT csa.*,
+                             LEAD(csa.START_DATE,1) OVER (ORDER BY csa.START_DATE) AS next_date
+                             FROM CLIENT_SERVICES_ALLO csa
+                             WHERE csa.CLIENT_ID =:clientId AND
+                                csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                                csa.START_DATE <= :effectiveDate
+                             )
+                        WHERE STOP_DATE+1<>next_date)
+                  THEN (CASE WHEN EXISTS(SELECT csa.* FROM CLIENT_SERVICES_ALLO csa where csa.CLIENT_ID =:clientId AND
+                               csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                                            :effectiveDate BETWEEN csa.START_DATE AND csa.STOP_DATE)
+                    THEN(SELECT MIN(cs.START_DATE) FROM CLIENT_SERVICES_ALLO cs
+                        WHERE cs.CLIENT_ID =:clientId AND
+                        cs.CLIENT_SERVICE_ID = :serviceId AND cs.IS_DELETED = 'N' AND
+                        cs.START_DATE > (SELECT MAX(STOP_DATE)
+                             FROM
+                             (SELECT csa.*,
+                             LEAD(csa.START_DATE,1) OVER (ORDER BY csa.START_DATE) AS next_date
+                             FROM CLIENT_SERVICES_ALLO csa
+                             WHERE csa.CLIENT_ID =:clientId AND
+                                csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                                csa.START_DATE <= :effectiveDate
+                             )
+                        WHERE STOP_DATE+1<>next_date))
+                        END )
+                   ELSE (CASE WHEN EXISTS(SELECT csa.* FROM CLIENT_SERVICES_ALLO csa where csa.CLIENT_ID =:clientId AND
+                               csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                                            :effectiveDate BETWEEN csa.START_DATE AND csa.STOP_DATE)
+                   THEN (SELECT MIN(csa.START_DATE)
+                         FROM CLIENT_SERVICES_ALLO csa
+                         WHERE csa.CLIENT_ID =:clientId AND
+                               csa.CLIENT_SERVICE_ID = :serviceId AND csa.IS_DELETED = 'N' AND
+                               csa.START_DATE <= :effectiveDate )
+                   END )
+                   END as  START_DATE
+              FROM DUAL
+        ]]>
+    </sql-query>
+
+    **********************************************************************************

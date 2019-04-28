@@ -15,7 +15,7 @@ public class CollectionDemo {
     */
     public static void main(String[] args) {
         /*Map for key value pair*/
-    /* This is how to declare HashMap */
+        /* This is how to declare HashMap */
         HashMap<Integer, String> hmap = new HashMap<Integer, String>();
 
       /*Adding elements to HashMap*/

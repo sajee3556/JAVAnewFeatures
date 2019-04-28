@@ -4,6 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -36,6 +37,10 @@ public class RegexTest {
         generateMD5("Asajee1234%");
 
         System.out.println(" "+toCamelCase("sAjee van"));
+
+        String str = "cCmd211cmd@$";
+        System.out.println(isPatternMatch(str));
+        System.out.println(passwordvalidation("aaZZa14y"));
 
     }
 
@@ -79,5 +84,17 @@ public class RegexTest {
         }
 
         return ret.toString();
+    }
+
+    public static boolean isPatternMatch(String str){
+         String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[$@$!%*?&])";
+         Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
+         Matcher matcher = pattern.matcher("cCmd211cmd@$");
+         return matcher.matches();
+    }
+
+    public static Boolean passwordvalidation(String str) {
+            String PASSWORD_PATTERN = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[$@$!%*?&])(?=\\S+$).{8,}";
+            return str.matches(PASSWORD_PATTERN);
     }
 }

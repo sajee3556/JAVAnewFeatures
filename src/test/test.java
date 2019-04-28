@@ -10,6 +10,9 @@ public class test {
     public static void main(String[] args) {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         System.out.println(timestamp.getTime());
+
+        String str= " fgd ";
+        System.out.println("match: "+str.trim()+"result: "+str.trim().equals("fgd"));
     }
 //    public static void main(String[] args) {
 //        int x=10;
